@@ -679,6 +679,10 @@
                 pasteArea.classList.add("has-image");
                 preview.src = imageData;
                 preview.style.display = "block";
+
+                // Update the getImageData function to return the new image data
+                row.getImageData = () => imageData;
+
                 updateStartButton();
               };
 
