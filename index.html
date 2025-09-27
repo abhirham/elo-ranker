@@ -1,507 +1,600 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ELO Product Ranker</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
 
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
+      .header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
 
-        .screen {
-            display: none;
-            padding: 40px;
-        }
+      .screen {
+        display: none;
+        padding: 40px;
+      }
 
-        .screen.active {
-            display: block;
-        }
+      .screen.active {
+        display: block;
+      }
 
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+      .btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
 
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
 
-        .btn-secondary {
-            background: #6c757d;
-        }
+      .btn-secondary {
+        background: #6c757d;
+      }
 
-        .btn-success {
-            background: #28a745;
-        }
+      .btn-success {
+        background: #28a745;
+      }
 
-        .btn-danger {
-            background: #dc3545;
-        }
+      .btn-danger {
+        background: #dc3545;
+      }
 
-        .btn-info {
-            background: #17a2b8;
-        }
+      .btn-info {
+        background: #17a2b8;
+      }
 
-        .file-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
-            align-items: center;
-        }
+      .file-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: center;
+        align-items: center;
+      }
 
-        .file-input {
-            display: none;
-        }
+      .file-input {
+        display: none;
+      }
 
-        .save-indicator {
-            color: #28a745;
-            font-size: 14px;
-            margin-left: 10px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+      .save-indicator {
+        color: #28a745;
+        font-size: 14px;
+        margin-left: 10px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
 
-        .save-indicator.show {
-            opacity: 1;
-        }
+      .save-indicator.show {
+        opacity: 1;
+      }
 
-        /* Input Screen Styles */
-        .product-form {
-            margin-bottom: 30px;
-        }
+      /* Input Screen Styles */
+      .product-form {
+        margin-bottom: 30px;
+      }
 
+      .product-row {
+        display: grid;
+        grid-template-columns: 300px 120px 1fr 80px 40px;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+
+      .delete-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      .delete-btn:hover {
+        background: #c82333;
+        transform: scale(1.1);
+      }
+
+      .delete-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .image-paste-area {
+        position: relative;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #fff;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .image-paste-area:hover {
+        border-color: #667eea;
+        background: #f8f9fa;
+      }
+
+      .image-paste-area.has-image {
+        border-color: #28a745;
+        background: #f8fff9;
+      }
+
+      .image-paste-area .paste-text {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 5px;
+      }
+
+      .image-paste-area .paste-hint {
+        font-size: 12px;
+        color: #999;
+      }
+
+      .image-paste-area .image-preview {
+        max-width: 100%;
+        max-height: 100px;
+        border-radius: 5px;
+        object-fit: cover;
+      }
+
+      .product-row input,
+      .product-row textarea {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      .product-row textarea {
+        resize: vertical;
+        min-height: 60px;
+      }
+
+      .product-row .preview {
+        width: 50px;
+        height: 50px;
+        background: #e9ecef;
+        border-radius: 5px;
+        object-fit: cover;
+        border: 1px solid #ddd;
+      }
+
+      .add-remove-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+      }
+
+      .form-actions {
+        text-align: center;
+        margin-top: 30px;
+      }
+
+      /* Ranking Screen Styles */
+      .ranking-container {
+        text-align: center;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        margin-bottom: 30px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .comparison-container {
+        display: flex;
+        gap: 40px;
+        justify-content: center;
+        align-items: center;
+        margin: 40px 0;
+      }
+
+      .product-option {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .product-option:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .product-option img {
+        width: 300px;
+        height: 300px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .vs-divider {
+        font-size: 2em;
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .ranking-stats {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+      }
+
+      .stat {
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 2em;
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .stat-label {
+        color: #6c757d;
+        margin-top: 5px;
+      }
+
+      /* Results Screen Styles */
+      .results-container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .result-item {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 5px solid #667eea;
+      }
+
+      .result-rank {
+        font-size: 2em;
+        font-weight: bold;
+        color: #667eea;
+        width: 60px;
+        text-align: center;
+      }
+
+      .result-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin: 0 20px;
+      }
+
+      .result-details {
+        flex: 1;
+      }
+
+      .result-price {
+        font-size: 1.4em;
+        font-weight: bold;
+        color: #28a745;
+        margin-bottom: 10px;
+      }
+
+      .result-description {
+        color: #6c757d;
+        line-height: 1.5;
+        margin-bottom: 10px;
+      }
+
+      .result-stats {
+        display: flex;
+        gap: 20px;
+        font-size: 0.9em;
+        color: #007bff;
+      }
+
+      .results-actions {
+        text-align: center;
+        margin-top: 40px;
+      }
+
+      @media (max-width: 768px) {
         .product-row {
-            display: grid;
-            grid-template-columns: 300px 120px 1fr 80px;
-            gap: 15px;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
+          grid-template-columns: 1fr;
+          gap: 10px;
         }
 
-        .image-paste-area {
-            position: relative;
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #fff;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-
-        .image-paste-area:hover {
-            border-color: #667eea;
-            background: #f8f9fa;
-        }
-
-        .image-paste-area.has-image {
-            border-color: #28a745;
-            background: #f8fff9;
-        }
-
-        .image-paste-area .paste-text {
-            font-size: 14px;
-            color: #6c757d;
-            margin-bottom: 5px;
-        }
-
-        .image-paste-area .paste-hint {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .image-paste-area .image-preview {
-            max-width: 100%;
-            max-height: 100px;
-            border-radius: 5px;
-            object-fit: cover;
-        }
-
-        .product-row input, .product-row textarea {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .product-row textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-
-        .product-row .preview {
-            width: 50px;
-            height: 50px;
-            background: #e9ecef;
-            border-radius: 5px;
-            object-fit: cover;
-            border: 1px solid #ddd;
-        }
-
-        .add-remove-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .form-actions {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        /* Ranking Screen Styles */
-        .ranking-container {
-            text-align: center;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e9ecef;
-            border-radius: 4px;
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            width: 0%;
-            transition: width 0.3s ease;
+        .delete-btn {
+          justify-self: end;
+          margin-top: 10px;
         }
 
         .comparison-container {
-            display: flex;
-            gap: 40px;
-            justify-content: center;
-            align-items: center;
-            margin: 40px 0;
-        }
-
-        .product-option {
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .product-option:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+          flex-direction: column;
+          gap: 20px;
         }
 
         .product-option img {
-            width: 300px;
-            height: 300px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .vs-divider {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .ranking-stats {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-label {
-            color: #6c757d;
-            margin-top: 5px;
-        }
-
-        /* Results Screen Styles */
-        .results-container {
-            max-width: 800px;
-            margin: 0 auto;
+          width: 250px;
+          height: 250px;
         }
 
         .result-item {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-            margin-bottom: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border-left: 5px solid #667eea;
+          flex-direction: column;
+          text-align: center;
         }
 
         .result-rank {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-            width: 60px;
-            text-align: center;
+          margin-bottom: 15px;
         }
-
-        .result-image {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin: 0 20px;
-        }
-
-        .result-details {
-            flex: 1;
-        }
-
-        .result-price {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #28a745;
-            margin-bottom: 10px;
-        }
-
-        .result-description {
-            color: #6c757d;
-            line-height: 1.5;
-            margin-bottom: 10px;
-        }
-
-        .result-stats {
-            display: flex;
-            gap: 20px;
-            font-size: 0.9em;
-            color: #007bff;
-        }
-
-        .results-actions {
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        @media (max-width: 768px) {
-            .product-row {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-
-            .comparison-container {
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .product-option img {
-                width: 250px;
-                height: 250px;
-            }
-
-            .result-item {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .result-rank {
-                margin-bottom: 15px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <h1>🏆 ELO Product Ranker</h1>
-            <p>Rank your products using fair head-to-head comparisons</p>
+      <div class="header">
+        <h1>🏆 ELO Product Ranker</h1>
+        <p>Rank your products using fair head-to-head comparisons</p>
+      </div>
+
+      <!-- Input Screen -->
+      <div id="inputScreen" class="screen active">
+        <h2>Add Products to Compare</h2>
+        <p style="color: #6c757d; margin-bottom: 30px">
+          Add multiple products efficiently. Paste images from clipboard, add
+          price and description.
+        </p>
+
+        <div class="product-form">
+          <div id="productRows">
+            <div class="product-row">
+              <div class="image-paste-area" tabindex="0">
+                <div class="paste-text">📋 Click & Paste Image</div>
+                <div class="paste-hint">Ctrl+V to paste from clipboard</div>
+              </div>
+              <input type="text" placeholder="$99.99" class="price" required />
+              <textarea
+                placeholder="Product description..."
+                class="description"
+                required
+              ></textarea>
+              <img
+                class="preview"
+                alt="Preview"
+                style="width: 60px; height: 60px"
+              />
+              <button
+                class="delete-btn"
+                onclick="deleteProductRow(this)"
+                title="Delete this product"
+              >
+                ×
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Input Screen -->
-        <div id="inputScreen" class="screen active">
-            <h2>Add Products to Compare</h2>
-            <p style="color: #6c757d; margin-bottom: 30px;">Add multiple products efficiently. Paste images from clipboard, add price and description.</p>
-
-            <div class="product-form">
-                <div id="productRows">
-                    <div class="product-row">
-                        <div class="image-paste-area" tabindex="0">
-                            <div class="paste-text">📋 Click & Paste Image</div>
-                            <div class="paste-hint">Ctrl+V to paste from clipboard</div>
-                        </div>
-                        <input type="text" placeholder="$99.99" class="price" required>
-                        <textarea placeholder="Product description..." class="description" required></textarea>
-                        <img class="preview" alt="Preview" style="width: 60px; height: 60px;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="add-remove-buttons">
-                <button class="btn" onclick="addProductRow()">+ Add Product</button>
-                <button class="btn btn-secondary" onclick="removeProductRow()">- Remove Last</button>
-            </div>
-
-            <div class="file-controls">
-                <button class="btn btn-info" onclick="saveData()">💾 Save Data</button>
-                <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📁 Load Data</button>
-                <input type="file" id="fileInput" class="file-input" accept=".json" onchange="loadData(event)">
-                <span class="save-indicator" id="saveIndicator">✓ Data saved!</span>
-            </div>
-
-            <div class="form-actions">
-                <button class="btn btn-success" onclick="startRanking()" id="startBtn" disabled>Start Ranking</button>
-            </div>
+        <div class="add-remove-buttons">
+          <button class="btn" onclick="addProductRow()">+ Add Product</button>
+          <button class="btn btn-secondary" onclick="removeProductRow()">
+            - Remove Last
+          </button>
         </div>
 
-        <!-- Ranking Screen -->
-        <div id="rankingScreen" class="screen">
-            <div class="ranking-container">
-                <h2>Choose Your Preference</h2>
-                <p style="color: #6c757d; margin-bottom: 20px;">Click on the product you prefer</p>
-
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-
-                <div class="comparison-container">
-                    <div class="product-option" onclick="selectProduct(0)">
-                        <img id="product1" alt="Product 1">
-                    </div>
-                    <div class="vs-divider">VS</div>
-                    <div class="product-option" onclick="selectProduct(1)">
-                        <img id="product2" alt="Product 2">
-                    </div>
-                </div>
-
-                <div class="ranking-stats">
-                    <div class="stat">
-                        <div class="stat-value" id="completedComparisons">0</div>
-                        <div class="stat-label">Comparisons Done</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value" id="totalComparisons">0</div>
-                        <div class="stat-label">Total Needed</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value" id="progressPercent">0%</div>
-                        <div class="stat-label">Progress</div>
-                    </div>
-                </div>
-
-                <div style="margin-top: 30px;">
-                    <button class="btn btn-secondary" onclick="skipComparison()">Skip This Comparison</button>
-                    <button class="btn btn-danger" onclick="finishEarly()" style="margin-left: 15px;">Finish Early</button>
-                </div>
-            </div>
+        <div class="file-controls">
+          <button class="btn btn-info" onclick="saveData()">
+            💾 Save Data
+          </button>
+          <button
+            class="btn btn-secondary"
+            onclick="document.getElementById('fileInput').click()"
+          >
+            📁 Load Data
+          </button>
+          <input
+            type="file"
+            id="fileInput"
+            class="file-input"
+            accept=".json"
+            onchange="loadData(event)"
+          />
+          <span class="save-indicator" id="saveIndicator">✓ Data saved!</span>
         </div>
 
-        <!-- Results Screen -->
-        <div id="resultsScreen" class="screen">
-            <div class="results-container">
-                <h2>🏆 Final Rankings</h2>
-                <p style="color: #6c757d; margin-bottom: 30px; text-align: center;">Products ranked by ELO rating from highest to lowest</p>
-
-                <div id="resultsContainer">
-                    <!-- Results will be populated here -->
-                </div>
-
-                <div class="results-actions">
-                    <button class="btn" onclick="restartRanking()">Rank Again</button>
-                    <button class="btn btn-secondary" onclick="startOver()">Start Over</button>
-                    <button class="btn btn-info" onclick="saveResults()" style="margin-left: 15px;">💾 Save Results</button>
-                </div>
-            </div>
+        <div class="form-actions">
+          <button
+            class="btn btn-success"
+            onclick="startRanking()"
+            id="startBtn"
+            disabled
+          >
+            Start Ranking
+          </button>
         </div>
+      </div>
+
+      <!-- Ranking Screen -->
+      <div id="rankingScreen" class="screen">
+        <div class="ranking-container">
+          <h2>Choose Your Preference</h2>
+          <p style="color: #6c757d; margin-bottom: 20px">
+            Click on the product you prefer
+          </p>
+
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+
+          <div class="comparison-container">
+            <div class="product-option" onclick="selectProduct(0)">
+              <img id="product1" alt="Product 1" />
+            </div>
+            <div class="vs-divider">VS</div>
+            <div class="product-option" onclick="selectProduct(1)">
+              <img id="product2" alt="Product 2" />
+            </div>
+          </div>
+
+          <div class="ranking-stats">
+            <div class="stat">
+              <div class="stat-value" id="completedComparisons">0</div>
+              <div class="stat-label">Comparisons Done</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value" id="totalComparisons">0</div>
+              <div class="stat-label">Total Needed</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value" id="progressPercent">0%</div>
+              <div class="stat-label">Progress</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 30px">
+            <button class="btn btn-secondary" onclick="skipComparison()">
+              Skip This Comparison
+            </button>
+            <button
+              class="btn btn-danger"
+              onclick="finishEarly()"
+              style="margin-left: 15px"
+            >
+              Finish Early
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Screen -->
+      <div id="resultsScreen" class="screen">
+        <div class="results-container">
+          <h2>🏆 Final Rankings</h2>
+          <p style="color: #6c757d; margin-bottom: 30px; text-align: center">
+            Products ranked by ELO rating from highest to lowest
+          </p>
+
+          <div id="resultsContainer">
+            <!-- Results will be populated here -->
+          </div>
+
+          <div class="results-actions">
+            <button class="btn" onclick="restartRanking()">Rank Again</button>
+            <button class="btn btn-secondary" onclick="startOver()">
+              Start Over
+            </button>
+            <button
+              class="btn btn-info"
+              onclick="saveResults()"
+              style="margin-left: 15px"
+            >
+              💾 Save Results
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        let products = [];
-        let currentComparison = null;
-        let comparisons = [];
-        let completedComparisons = 0;
-        let earlyStopped = false;
+      let products = [];
+      let currentComparison = null;
+      let comparisons = [];
+      let completedComparisons = 0;
+      let earlyStopped = false;
 
-        class Product {
-            constructor(imageData, price, description) {
-                this.id = Date.now() + Math.random();
-                this.imageData = imageData;
-                this.price = price;
-                this.description = description;
-                this.elo = 1200;
-                this.wins = 0;
-                this.losses = 0;
-                this.comparisons = 0;
-            }
+      class Product {
+        constructor(imageData, price, description) {
+          this.id = Date.now() + Math.random();
+          this.imageData = imageData;
+          this.price = price;
+          this.description = description;
+          this.elo = 1200;
+          this.wins = 0;
+          this.losses = 0;
+          this.comparisons = 0;
         }
+      }
 
-        function addProductRow() {
-            const container = document.getElementById('productRows');
-            const newRow = document.createElement('div');
-            newRow.className = 'product-row';
-            newRow.innerHTML = `
+      function addProductRow() {
+        const container = document.getElementById("productRows");
+        const newRow = document.createElement("div");
+        newRow.className = "product-row";
+        newRow.innerHTML = `
                 <div class="image-paste-area" tabindex="0">
                     <div class="paste-text">📋 Click & Paste Image</div>
                     <div class="paste-hint">Ctrl+V to paste from clipboard</div>
@@ -509,208 +602,259 @@
                 <input type="text" placeholder="$99.99" class="price" required>
                 <textarea placeholder="Product description..." class="description" required></textarea>
                 <img class="preview" alt="Preview" style="width: 60px; height: 60px;">
+                <button class="delete-btn" onclick="deleteProductRow(this)" title="Delete this product">×</button>
             `;
-            container.appendChild(newRow);
-            setupImagePreview(newRow);
-            updateStartButton();
+        container.appendChild(newRow);
+        setupImagePreview(newRow);
+        updateStartButton();
+        updateDeleteButtons();
+      }
+
+      function removeProductRow() {
+        const container = document.getElementById("productRows");
+        if (container.children.length > 1) {
+          container.removeChild(container.lastElementChild);
+          updateStartButton();
+          updateDeleteButtons();
+        }
+      }
+
+      function deleteProductRow(button) {
+        const container = document.getElementById("productRows");
+        const row = button.closest(".product-row");
+
+        // Don't allow deleting if it's the only row
+        if (container.children.length <= 1) {
+          alert("You must have at least one product row.");
+          return;
         }
 
-        function removeProductRow() {
-            const container = document.getElementById('productRows');
-            if (container.children.length > 1) {
-                container.removeChild(container.lastElementChild);
+        // Confirm deletion if the row has data
+        const hasImage = row.getImageData && row.getImageData();
+        const price = row.querySelector(".price").value.trim();
+        const description = row.querySelector(".description").value.trim();
+
+        if (hasImage || price || description) {
+          if (!confirm("Are you sure you want to delete this product?")) {
+            return;
+          }
+        }
+
+        container.removeChild(row);
+        updateStartButton();
+        updateDeleteButtons();
+      }
+
+      function updateDeleteButtons() {
+        const rows = document.querySelectorAll(".product-row");
+        const deleteButtons = document.querySelectorAll(".delete-btn");
+
+        // Disable delete button if only one row remains
+        deleteButtons.forEach((btn) => {
+          btn.disabled = rows.length <= 1;
+        });
+      }
+
+      function setupImagePreview(row) {
+        const pasteArea = row.querySelector(".image-paste-area");
+        const preview = row.querySelector(".preview");
+        let imageData = null;
+
+        pasteArea.addEventListener("click", function () {
+          this.focus();
+        });
+
+        pasteArea.addEventListener("paste", function (e) {
+          e.preventDefault();
+          const items = e.clipboardData.items;
+
+          for (let item of items) {
+            if (item.type.indexOf("image") !== -1) {
+              const file = item.getAsFile();
+              const reader = new FileReader();
+
+              reader.onload = function (event) {
+                imageData = event.target.result;
+                pasteArea.innerHTML = `<img src="${imageData}" class="image-preview" alt="Pasted Image">`;
+                pasteArea.classList.add("has-image");
+                preview.src = imageData;
+                preview.style.display = "block";
                 updateStartButton();
+              };
+
+              reader.readAsDataURL(file);
+              break;
             }
+          }
+        });
+
+        pasteArea.addEventListener("keydown", function (e) {
+          if (e.ctrlKey && e.key === "v") {
+            // Paste event will be handled by the paste listener
+          }
+        });
+
+        // Store image data reference on the row
+        row.getImageData = () => imageData;
+
+        row
+          .querySelector(".price")
+          .addEventListener("input", updateStartButton);
+        row
+          .querySelector(".description")
+          .addEventListener("input", updateStartButton);
+      }
+
+      function updateStartButton() {
+        const rows = document.querySelectorAll(".product-row");
+        let validProducts = 0;
+
+        rows.forEach((row) => {
+          const hasImage = row.getImageData && row.getImageData();
+          const price = row.querySelector(".price").value.trim();
+          const description = row.querySelector(".description").value.trim();
+
+          if (hasImage && price && description) {
+            validProducts++;
+          }
+        });
+
+        const startBtn = document.getElementById("startBtn");
+        startBtn.disabled = validProducts < 2;
+        startBtn.textContent =
+          validProducts < 2
+            ? `Need at least 2 products (${validProducts} added)`
+            : `Start Ranking ${validProducts} Products`;
+      }
+
+      function startRanking() {
+        const rows = document.querySelectorAll(".product-row");
+        products = [];
+
+        rows.forEach((row) => {
+          const imageData = row.getImageData ? row.getImageData() : null;
+          const price = row.querySelector(".price").value.trim();
+          const description = row.querySelector(".description").value.trim();
+
+          if (imageData && price && description) {
+            products.push(new Product(imageData, price, description));
+          }
+        });
+
+        if (products.length < 2) return;
+
+        generateComparisons();
+        showScreen("rankingScreen");
+        nextComparison();
+      }
+
+      function saveData() {
+        const rows = document.querySelectorAll(".product-row");
+        const productData = [];
+
+        rows.forEach((row) => {
+          const imageData = row.getImageData ? row.getImageData() : null;
+          const price = row.querySelector(".price").value.trim();
+          const description = row.querySelector(".description").value.trim();
+
+          if (imageData || price || description) {
+            productData.push({
+              imageData: imageData,
+              price: price,
+              description: description,
+            });
+          }
+        });
+
+        if (productData.length === 0) {
+          alert("No data to save. Please add some products first.");
+          return;
         }
 
-        function setupImagePreview(row) {
-            const pasteArea = row.querySelector('.image-paste-area');
-            const preview = row.querySelector('.preview');
-            let imageData = null;
+        const dataToSave = {
+          timestamp: new Date().toISOString(),
+          products: productData,
+          version: "1.0",
+        };
 
-            pasteArea.addEventListener('click', function() {
-                this.focus();
-            });
+        const blob = new Blob([JSON.stringify(dataToSave, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `elo-ranking-${
+          new Date().toISOString().split("T")[0]
+        }.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
-            pasteArea.addEventListener('paste', function(e) {
-                e.preventDefault();
-                const items = e.clipboardData.items;
+        // Show save indicator
+        const indicator = document.getElementById("saveIndicator");
+        indicator.classList.add("show");
+        setTimeout(() => {
+          indicator.classList.remove("show");
+        }, 2000);
+      }
 
-                for (let item of items) {
-                    if (item.type.indexOf('image') !== -1) {
-                        const file = item.getAsFile();
-                        const reader = new FileReader();
+      function saveDataToFile() {
+        // Auto-save when starting ranking
+        if (products.length > 0) {
+          const dataToSave = {
+            timestamp: new Date().toISOString(),
+            products: products.map((p) => ({
+              imageData: p.imageData,
+              price: p.price,
+              description: p.description,
+            })),
+            version: "1.0",
+          };
 
-                        reader.onload = function(event) {
-                            imageData = event.target.result;
-                            pasteArea.innerHTML = `<img src="${imageData}" class="image-preview" alt="Pasted Image">`;
-                            pasteArea.classList.add('has-image');
-                            preview.src = imageData;
-                            preview.style.display = 'block';
-                            updateStartButton();
-                        };
-
-                        reader.readAsDataURL(file);
-                        break;
-                    }
-                }
-            });
-
-            pasteArea.addEventListener('keydown', function(e) {
-                if (e.ctrlKey && e.key === 'v') {
-                    // Paste event will be handled by the paste listener
-                }
-            });
-
-            // Store image data reference on the row
-            row.getImageData = () => imageData;
-
-            row.querySelector('.price').addEventListener('input', updateStartButton);
-            row.querySelector('.description').addEventListener('input', updateStartButton);
+          const blob = new Blob([JSON.stringify(dataToSave, null, 2)], {
+            type: "application/json",
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `elo-ranking-session-${
+            new Date().toISOString().split("T")[0]
+          }.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
         }
+      }
 
-        function updateStartButton() {
-            const rows = document.querySelectorAll('.product-row');
-            let validProducts = 0;
+      function loadData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-            rows.forEach(row => {
-                const hasImage = row.getImageData && row.getImageData();
-                const price = row.querySelector('.price').value.trim();
-                const description = row.querySelector('.description').value.trim();
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const data = JSON.parse(e.target.result);
 
-                if (hasImage && price && description) {
-                    validProducts++;
-                }
-            });
-
-            const startBtn = document.getElementById('startBtn');
-            startBtn.disabled = validProducts < 2;
-            startBtn.textContent = validProducts < 2 ?
-                `Need at least 2 products (${validProducts} added)` :
-                `Start Ranking ${validProducts} Products`;
-        }
-
-        function startRanking() {
-            const rows = document.querySelectorAll('.product-row');
-            products = [];
-
-            rows.forEach(row => {
-                const imageData = row.getImageData ? row.getImageData() : null;
-                const price = row.querySelector('.price').value.trim();
-                const description = row.querySelector('.description').value.trim();
-
-                if (imageData && price && description) {
-                    products.push(new Product(imageData, price, description));
-                }
-            });
-
-            if (products.length < 2) return;
-
-            // Auto-save data when starting ranking
-            saveDataToFile();
-
-            generateComparisons();
-            showScreen('rankingScreen');
-            nextComparison();
-        }
-
-        function saveData() {
-            const rows = document.querySelectorAll('.product-row');
-            const productData = [];
-
-            rows.forEach(row => {
-                const imageData = row.getImageData ? row.getImageData() : null;
-                const price = row.querySelector('.price').value.trim();
-                const description = row.querySelector('.description').value.trim();
-
-                if (imageData || price || description) {
-                    productData.push({
-                        imageData: imageData,
-                        price: price,
-                        description: description
-                    });
-                }
-            });
-
-            if (productData.length === 0) {
-                alert('No data to save. Please add some products first.');
-                return;
+            if (!data.products || !Array.isArray(data.products)) {
+              alert(
+                "Invalid file format. Please select a valid ELO ranking data file."
+              );
+              return;
             }
 
-            const dataToSave = {
-                timestamp: new Date().toISOString(),
-                products: productData,
-                version: '1.0'
-            };
+            // Clear existing rows
+            const container = document.getElementById("productRows");
+            container.innerHTML = "";
 
-            const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `elo-ranking-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            // Show save indicator
-            const indicator = document.getElementById('saveIndicator');
-            indicator.classList.add('show');
-            setTimeout(() => {
-                indicator.classList.remove('show');
-            }, 2000);
-        }
-
-        function saveDataToFile() {
-            // Auto-save when starting ranking
-            if (products.length > 0) {
-                const dataToSave = {
-                    timestamp: new Date().toISOString(),
-                    products: products.map(p => ({
-                        imageData: p.imageData,
-                        price: p.price,
-                        description: p.description
-                    })),
-                    version: '1.0'
-                };
-
-                const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `elo-ranking-session-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-        }
-
-        function loadData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-
-                    if (!data.products || !Array.isArray(data.products)) {
-                        alert('Invalid file format. Please select a valid ELO ranking data file.');
-                        return;
-                    }
-
-                    // Clear existing rows
-                    const container = document.getElementById('productRows');
-                    container.innerHTML = '';
-
-                    // Load products
-                    data.products.forEach((productData, index) => {
-                        if (index === 0) {
-                            // Use first row
-                            const row = document.createElement('div');
-                            row.className = 'product-row';
-                            row.innerHTML = `
+            // Load products
+            data.products.forEach((productData, index) => {
+              if (index === 0) {
+                // Use first row
+                const row = document.createElement("div");
+                row.className = "product-row";
+                row.innerHTML = `
                                 <div class="image-paste-area" tabindex="0">
                                     <div class="paste-text">📋 Click & Paste Image</div>
                                     <div class="paste-hint">Ctrl+V to paste from clipboard</div>
@@ -718,193 +862,219 @@
                                 <input type="text" placeholder="$99.99" class="price" required>
                                 <textarea placeholder="Product description..." class="description" required></textarea>
                                 <img class="preview" alt="Preview" style="width: 60px; height: 60px;">
+                                <button class="delete-btn" onclick="deleteProductRow(this)" title="Delete this product">×</button>
                             `;
-                            container.appendChild(row);
-                            setupImagePreview(row);
-                        } else {
-                            addProductRow();
-                        }
-                    });
-
-                    // Fill in the data
-                    const rows = document.querySelectorAll('.product-row');
-                    data.products.forEach((productData, index) => {
-                        if (rows[index]) {
-                            const row = rows[index];
-
-                            // Set image
-                            if (productData.imageData) {
-                                const pasteArea = row.querySelector('.image-paste-area');
-                                const preview = row.querySelector('.preview');
-
-                                pasteArea.innerHTML = `<img src="${productData.imageData}" class="image-preview" alt="Loaded Image">`;
-                                pasteArea.classList.add('has-image');
-                                preview.src = productData.imageData;
-                                preview.style.display = 'block';
-
-                                // Store image data
-                                row.getImageData = () => productData.imageData;
-                            }
-
-                            // Set price and description
-                            row.querySelector('.price').value = productData.price || '';
-                            row.querySelector('.description').value = productData.description || '';
-                        }
-                    });
-
-                    updateStartButton();
-                    alert(`Successfully loaded ${data.products.length} products from ${new Date(data.timestamp).toLocaleDateString()}`);
-
-                } catch (error) {
-                    alert('Error reading file. Please make sure it\'s a valid JSON file.');
-                    console.error('Load error:', error);
-                }
-            };
-
-            reader.readAsText(file);
-            // Reset file input
-            event.target.value = '';
-        }
-
-        function generateComparisons() {
-            comparisons = [];
-            for (let i = 0; i < products.length; i++) {
-                for (let j = i + 1; j < products.length; j++) {
-                    comparisons.push({
-                        product1: products[i],
-                        product2: products[j],
-                        completed: false
-                    });
-                }
-            }
-
-            shuffleArray(comparisons);
-            completedComparisons = 0;
-            updateProgress();
-        }
-
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
-        function nextComparison() {
-            if (shouldStopEarly()) {
-                finishRanking();
-                return;
-            }
-
-            const availableComparisons = comparisons.filter(c => !c.completed);
-            if (availableComparisons.length === 0) {
-                finishRanking();
-                return;
-            }
-
-            currentComparison = getNextBestComparison(availableComparisons);
-
-            document.getElementById('product1').src = currentComparison.product1.imageData;
-            document.getElementById('product2').src = currentComparison.product2.imageData;
-        }
-
-        function getNextBestComparison(availableComparisons) {
-            availableComparisons.sort((a, b) => {
-                const eloDiff1 = Math.abs(a.product1.elo - a.product2.elo);
-                const eloDiff2 = Math.abs(b.product1.elo - b.product2.elo);
-                return eloDiff1 - eloDiff2;
+                container.appendChild(row);
+                setupImagePreview(row);
+              } else {
+                addProductRow();
+              }
             });
 
-            return availableComparisons[0];
+            // Fill in the data
+            const rows = document.querySelectorAll(".product-row");
+            data.products.forEach((productData, index) => {
+              if (rows[index]) {
+                const row = rows[index];
+
+                // Set image
+                if (productData.imageData) {
+                  const pasteArea = row.querySelector(".image-paste-area");
+                  const preview = row.querySelector(".preview");
+
+                  pasteArea.innerHTML = `<img src="${productData.imageData}" class="image-preview" alt="Loaded Image">`;
+                  pasteArea.classList.add("has-image");
+                  preview.src = productData.imageData;
+                  preview.style.display = "block";
+
+                  // Store image data
+                  row.getImageData = () => productData.imageData;
+                }
+
+                // Set price and description
+                row.querySelector(".price").value = productData.price || "";
+                row.querySelector(".description").value =
+                  productData.description || "";
+              }
+            });
+
+            updateStartButton();
+            updateDeleteButtons();
+            alert(
+              `Successfully loaded ${
+                data.products.length
+              } products from ${new Date(data.timestamp).toLocaleDateString()}`
+            );
+          } catch (error) {
+            alert(
+              "Error reading file. Please make sure it's a valid JSON file."
+            );
+            console.error("Load error:", error);
+          }
+        };
+
+        reader.readAsText(file);
+        // Reset file input
+        event.target.value = "";
+      }
+
+      function generateComparisons() {
+        comparisons = [];
+        for (let i = 0; i < products.length; i++) {
+          for (let j = i + 1; j < products.length; j++) {
+            comparisons.push({
+              product1: products[i],
+              product2: products[j],
+              completed: false,
+            });
+          }
         }
 
-        function selectProduct(choice) {
-            if (!currentComparison) return;
+        shuffleArray(comparisons);
+        completedComparisons = 0;
+        updateProgress();
+      }
 
-            const winner = choice === 0 ? currentComparison.product1 : currentComparison.product2;
-            const loser = choice === 0 ? currentComparison.product2 : currentComparison.product1;
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
 
-            updateELO(winner, loser);
-            currentComparison.completed = true;
-            completedComparisons++;
-
-            updateProgress();
-            nextComparison();
+      function nextComparison() {
+        if (shouldStopEarly()) {
+          finishRanking();
+          return;
         }
 
-        function updateELO(winner, loser) {
-            const kFactor = Math.max(16, 64 - products.length * 2);
-
-            const expectedWinner = 1 / (1 + Math.pow(10, (loser.elo - winner.elo) / 400));
-            const expectedLoser = 1 / (1 + Math.pow(10, (winner.elo - loser.elo) / 400));
-
-            winner.elo += kFactor * (1 - expectedWinner);
-            loser.elo += kFactor * (0 - expectedLoser);
-
-            winner.wins++;
-            loser.losses++;
-            winner.comparisons++;
-            loser.comparisons++;
+        const availableComparisons = comparisons.filter((c) => !c.completed);
+        if (availableComparisons.length === 0) {
+          finishRanking();
+          return;
         }
 
-        function shouldStopEarly() {
-            if (completedComparisons < products.length * 3) return false;
+        currentComparison = getNextBestComparison(availableComparisons);
 
-            products.sort((a, b) => b.elo - a.elo);
+        document.getElementById("product1").src =
+          currentComparison.product1.imageData;
+        document.getElementById("product2").src =
+          currentComparison.product2.imageData;
+      }
 
-            const topThree = products.slice(0, Math.min(3, products.length));
-            const bottomThree = products.slice(-Math.min(3, products.length));
+      function getNextBestComparison(availableComparisons) {
+        availableComparisons.sort((a, b) => {
+          const eloDiff1 = Math.abs(a.product1.elo - a.product2.elo);
+          const eloDiff2 = Math.abs(b.product1.elo - b.product2.elo);
+          return eloDiff1 - eloDiff2;
+        });
 
-            const maxTopElo = Math.max(...topThree.map(p => p.elo));
-            const minBottomElo = Math.min(...bottomThree.map(p => p.elo));
+        return availableComparisons[0];
+      }
 
-            return (maxTopElo - minBottomElo) > 400;
-        }
+      function selectProduct(choice) {
+        if (!currentComparison) return;
 
-        function skipComparison() {
-            if (!currentComparison) return;
-            currentComparison.completed = true;
-            nextComparison();
-        }
+        const winner =
+          choice === 0
+            ? currentComparison.product1
+            : currentComparison.product2;
+        const loser =
+          choice === 0
+            ? currentComparison.product2
+            : currentComparison.product1;
 
-        function finishEarly() {
-            earlyStopped = true;
-            finishRanking();
-        }
+        updateELO(winner, loser);
+        currentComparison.completed = true;
+        completedComparisons++;
 
-        function updateProgress() {
-            const totalNeeded = comparisons.length;
-            const progress = (completedComparisons / totalNeeded) * 100;
+        updateProgress();
+        nextComparison();
+      }
 
-            document.getElementById('progressFill').style.width = progress + '%';
-            document.getElementById('completedComparisons').textContent = completedComparisons;
-            document.getElementById('totalComparisons').textContent = totalNeeded;
-            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
-        }
+      function updateELO(winner, loser) {
+        const kFactor = Math.max(16, 64 - products.length * 2);
 
-        function finishRanking() {
-            products.sort((a, b) => b.elo - a.elo);
-            showResults();
-            showScreen('resultsScreen');
-        }
+        const expectedWinner =
+          1 / (1 + Math.pow(10, (loser.elo - winner.elo) / 400));
+        const expectedLoser =
+          1 / (1 + Math.pow(10, (winner.elo - loser.elo) / 400));
 
-        function showResults() {
-            const container = document.getElementById('resultsContainer');
-            container.innerHTML = '';
+        winner.elo += kFactor * (1 - expectedWinner);
+        loser.elo += kFactor * (0 - expectedLoser);
 
-            products.forEach((product, index) => {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'result-item';
+        winner.wins++;
+        loser.losses++;
+        winner.comparisons++;
+        loser.comparisons++;
+      }
 
-                const winRate = product.comparisons > 0 ?
-                    Math.round((product.wins / product.comparisons) * 100) : 0;
+      function shouldStopEarly() {
+        if (completedComparisons < products.length * 3) return false;
 
-                resultItem.innerHTML = `
+        products.sort((a, b) => b.elo - a.elo);
+
+        const topThree = products.slice(0, Math.min(3, products.length));
+        const bottomThree = products.slice(-Math.min(3, products.length));
+
+        const maxTopElo = Math.max(...topThree.map((p) => p.elo));
+        const minBottomElo = Math.min(...bottomThree.map((p) => p.elo));
+
+        return maxTopElo - minBottomElo > 400;
+      }
+
+      function skipComparison() {
+        if (!currentComparison) return;
+        currentComparison.completed = true;
+        nextComparison();
+      }
+
+      function finishEarly() {
+        earlyStopped = true;
+        finishRanking();
+      }
+
+      function updateProgress() {
+        const totalNeeded = comparisons.length;
+        const progress = (completedComparisons / totalNeeded) * 100;
+
+        document.getElementById("progressFill").style.width = progress + "%";
+        document.getElementById("completedComparisons").textContent =
+          completedComparisons;
+        document.getElementById("totalComparisons").textContent = totalNeeded;
+        document.getElementById("progressPercent").textContent =
+          Math.round(progress) + "%";
+      }
+
+      function finishRanking() {
+        products.sort((a, b) => b.elo - a.elo);
+        showResults();
+        showScreen("resultsScreen");
+      }
+
+      function showResults() {
+        const container = document.getElementById("resultsContainer");
+        container.innerHTML = "";
+
+        products.forEach((product, index) => {
+          const resultItem = document.createElement("div");
+          resultItem.className = "result-item";
+
+          const winRate =
+            product.comparisons > 0
+              ? Math.round((product.wins / product.comparisons) * 100)
+              : 0;
+
+          resultItem.innerHTML = `
                     <div class="result-rank">#${index + 1}</div>
-                    <img src="${product.imageData}" alt="Product ${index + 1}" class="result-image">
+                    <img src="${product.imageData}" alt="Product ${
+            index + 1
+          }" class="result-image">
                     <div class="result-details">
                         <div class="result-price">${product.price}</div>
-                        <div class="result-description">${product.description}</div>
+                        <div class="result-description">${
+                          product.description
+                        }</div>
                         <div class="result-stats">
                             <span>ELO: ${Math.round(product.elo)}</span>
                             <span>Win Rate: ${winRate}%</span>
@@ -913,31 +1083,31 @@
                     </div>
                 `;
 
-                container.appendChild(resultItem);
-            });
-        }
+          container.appendChild(resultItem);
+        });
+      }
 
-        function restartRanking() {
-            products.forEach(p => {
-                p.elo = 1200;
-                p.wins = 0;
-                p.losses = 0;
-                p.comparisons = 0;
-            });
+      function restartRanking() {
+        products.forEach((p) => {
+          p.elo = 1200;
+          p.wins = 0;
+          p.losses = 0;
+          p.comparisons = 0;
+        });
 
-            generateComparisons();
-            showScreen('rankingScreen');
-            nextComparison();
-        }
+        generateComparisons();
+        showScreen("rankingScreen");
+        nextComparison();
+      }
 
-        function startOver() {
-            products = [];
-            comparisons = [];
-            completedComparisons = 0;
-            currentComparison = null;
-            earlyStopped = false;
+      function startOver() {
+        products = [];
+        comparisons = [];
+        completedComparisons = 0;
+        currentComparison = null;
+        earlyStopped = false;
 
-            document.getElementById('productRows').innerHTML = `
+        document.getElementById("productRows").innerHTML = `
                 <div class="product-row">
                     <div class="image-paste-area" tabindex="0">
                         <div class="paste-text">📋 Click & Paste Image</div>
@@ -946,62 +1116,72 @@
                     <input type="text" placeholder="$99.99" class="price" required>
                     <textarea placeholder="Product description..." class="description" required></textarea>
                     <img class="preview" alt="Preview" style="width: 60px; height: 60px;">
+                    <button class="delete-btn" onclick="deleteProductRow(this)" title="Delete this product">×</button>
                 </div>
             `;
 
-            setupImagePreview(document.querySelector('.product-row'));
-            updateStartButton();
-            showScreen('inputScreen');
-        }
+        setupImagePreview(document.querySelector(".product-row"));
+        updateStartButton();
+        updateDeleteButtons();
+        showScreen("inputScreen");
+      }
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        function saveResults() {
-            if (products.length === 0) {
-                alert('No results to save.');
-                return;
-            }
-
-            const resultsData = {
-                timestamp: new Date().toISOString(),
-                results: products.map((product, index) => ({
-                    rank: index + 1,
-                    imageData: product.imageData,
-                    price: product.price,
-                    description: product.description,
-                    elo: Math.round(product.elo),
-                    wins: product.wins,
-                    losses: product.losses,
-                    comparisons: product.comparisons,
-                    winRate: product.comparisons > 0 ? Math.round((product.wins / product.comparisons) * 100) : 0
-                })),
-                totalComparisons: completedComparisons,
-                earlyStopped: earlyStopped,
-                version: '1.0'
-            };
-
-            const blob = new Blob([JSON.stringify(resultsData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `elo-ranking-results-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            alert('Results saved successfully!');
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            setupImagePreview(document.querySelector('.product-row'));
-            updateStartButton();
+      function showScreen(screenId) {
+        document.querySelectorAll(".screen").forEach((screen) => {
+          screen.classList.remove("active");
         });
+        document.getElementById(screenId).classList.add("active");
+      }
+
+      function saveResults() {
+        if (products.length === 0) {
+          alert("No results to save.");
+          return;
+        }
+
+        const resultsData = {
+          timestamp: new Date().toISOString(),
+          results: products.map((product, index) => ({
+            rank: index + 1,
+            imageData: product.imageData,
+            price: product.price,
+            description: product.description,
+            elo: Math.round(product.elo),
+            wins: product.wins,
+            losses: product.losses,
+            comparisons: product.comparisons,
+            winRate:
+              product.comparisons > 0
+                ? Math.round((product.wins / product.comparisons) * 100)
+                : 0,
+          })),
+          totalComparisons: completedComparisons,
+          earlyStopped: earlyStopped,
+          version: "1.0",
+        };
+
+        const blob = new Blob([JSON.stringify(resultsData, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `elo-ranking-results-${
+          new Date().toISOString().split("T")[0]
+        }.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert("Results saved successfully!");
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        setupImagePreview(document.querySelector(".product-row"));
+        updateStartButton();
+        updateDeleteButtons();
+      });
     </script>
-</body>
+  </body>
 </html>
